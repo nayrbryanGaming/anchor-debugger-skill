@@ -24,7 +24,7 @@ if [ -d "${SKILL_DIR}/skill" ]; then
   fi
 else
   # Running via curl | bash — clone the repo
-  REPO_URL="https://github.com/nayrbryangaming3/anchor-debugger-skill.git"
+  REPO_URL="https://github.com/nayrbryanGaming/anchor-debugger-skill.git"
   if [ -d "${TARGET_DIR}" ]; then
     echo "Updating existing install..."
     git -C "${TARGET_DIR}" pull --ff-only
@@ -47,7 +47,7 @@ fi
 if git rev-parse --is-inside-work-tree &>/dev/null 2>&1; then
   echo ""
   echo "To add as a git submodule to your project:"
-  echo "  git submodule add https://github.com/nayrbryangaming3/anchor-debugger-skill.git .claude/skills/anchor-debugger-skill"
+  echo "  git submodule add https://github.com/nayrbryanGaming/anchor-debugger-skill.git .claude/skills/anchor-debugger-skill"
 fi
 
 echo ""
