@@ -327,6 +327,7 @@ function Nav() {
         <a href="#problems" className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors hidden md:block">Problems</a>
         <a href="#features" className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors hidden md:block">Skills</a>
         <a href="#install" className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors hidden md:block">Install</a>
+        <a href="/demo" className="text-sm font-semibold text-[var(--purple)] hover:text-[var(--text)] transition-colors hidden md:block">Demo →</a>
         <motion.a
           href="https://github.com/nayrbryanGaming/anchor-debugger-skill"
           target="_blank" rel="noopener noreferrer"
@@ -401,6 +402,14 @@ function Hero() {
               className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--purple)] text-white font-semibold text-sm"
             >
               Install skill <ArrowRight size={14} />
+            </motion.a>
+            <motion.a
+              href="/demo"
+              whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(20,241,149,0.25)" }}
+              whileTap={{ scale: 0.97 }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[var(--green)] text-[var(--green)] font-semibold text-sm hover:bg-[rgba(20,241,149,0.08)] transition-colors"
+            >
+              Try demo <ArrowRight size={14} />
             </motion.a>
             <motion.a
               href="https://github.com/nayrbryanGaming/anchor-debugger-skill"
