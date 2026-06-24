@@ -120,6 +120,19 @@ Two-layer coverage:
 1. **Core Anchor layer** — universally useful for any Solana developer
 2. **PayFi layer** — specialized for payment programs, streaming, escrow, and agent payments
 
+## How this differs from existing kit skills
+
+Several skills in the Solana AI Kit touch adjacent areas. Here is the precise gap this skill fills:
+
+| Existing skill | What it covers | What it does NOT cover |
+|---|---|---|
+| `trailofbits/skills` | Static security audits, vulnerability patterns | Runtime tx debugging, CU profiling, PayFi-specific failures |
+| `frankcastleauditor/safe-solana-builder` | Safe coding patterns upfront | Diagnosing errors after a tx fails |
+| `QEDGen/solana-skills` | General Solana development | Anchor-specific error catalog, upgrade safety, PayFi layer |
+| `solana-dev-skill` | General Solana builder guidance | Anchor constraint errors, CU breakdown, streaming payment edge cases |
+
+This skill's specific contribution: **post-failure diagnosis for Anchor programs + PayFi-specific failure modes that no existing skill addresses** — clock drift in escrow, rent loss in streaming accounts, x402 agent payment timing, silent CPI failures in payout contracts, and upgrade safety for programs with active deposits.
+
 ## License
 
 MIT
