@@ -3,427 +3,395 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>anchor-debugger-skill — Solana AI Kit</title>
-  <meta name="description" content="Production-grade Claude Code skill for Solana/Anchor developers. Diagnose failing transactions, decode error codes, optimize compute units, verify upgrade safety." />
+  <title>anchor-payfi-debugger-skill — Solana AI Kit</title>
+  <meta name="description" content="Cross-domain Claude Code skill: Anchor debugging × PayFi. Diagnose payment flow failures, optimize CUs for high-frequency payment programs, build production-grade escrow/streaming/x402 patterns." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0a0a0f;
-      --surface: #111118;
-      --border: #1e1e2e;
-      --text: #e2e2f0;
-      --muted: #6e6e8a;
+      --bg: #080810;
+      --surface: #0f0f1a;
+      --surface2: #13131f;
+      --border: #1a1a2e;
+      --text: #e4e4f0;
+      --muted: #6060800;
+      --muted: #636380;
       --accent: #9945FF;
       --accent2: #14F195;
-      --red: #ff4f4f;
-      --yellow: #ffd166;
+      --gold: #FFD166;
+      --red: #FF4F6A;
+      --blue: #4FC3F7;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      line-height: 1.6;
-      min-height: 100vh;
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; line-height: 1.6; }
     a { color: var(--accent2); text-decoration: none; }
     a:hover { text-decoration: underline; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
 
     /* NAV */
     nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 2rem;
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      background: rgba(10,10,15,0.85);
-      z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.1rem 2rem; border-bottom: 1px solid var(--border);
+      background: rgba(8,8,16,0.88); backdrop-filter: blur(16px);
+      position: sticky; top: 0; z-index: 20;
     }
-    .nav-logo {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      color: var(--accent2);
-      font-weight: 500;
-    }
-    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-    .nav-links a { color: var(--muted); font-size: 0.875rem; transition: color 0.2s; }
+    .nav-logo { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent2); font-weight: 500; }
+    .nav-links { display: flex; gap: 1.25rem; align-items: center; }
+    .nav-links a { color: var(--muted); font-size: 0.85rem; transition: color .2s; }
     .nav-links a:hover { color: var(--text); text-decoration: none; }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.2s;
-      cursor: pointer;
-      border: none;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-    }
+    .btn { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem .9rem; border-radius: 6px; font-size: .85rem; font-weight: 500; transition: all .2s; border: none; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:hover { background: #7c2fe0; text-decoration: none; }
-    .btn-ghost {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
     .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); text-decoration: none; }
 
     /* HERO */
-    .hero {
-      text-align: center;
-      padding: 5rem 2rem 3rem;
-      max-width: 800px;
-      margin: 0 auto;
+    .hero { text-align: center; padding: 5.5rem 2rem 2.5rem; max-width: 820px; margin: 0 auto; position: relative; }
+    .hero::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse at center, rgba(153,69,255,.12) 0%, transparent 70%);
+      pointer-events: none;
     }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(153,69,255,0.12);
-      border: 1px solid rgba(153,69,255,0.3);
-      color: var(--accent);
-      padding: 0.3rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 1.5rem;
+    .pill-row { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .pill {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .25rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .07em;
     }
+    .pill-purple { background: rgba(153,69,255,.12); border: 1px solid rgba(153,69,255,.3); color: var(--accent); }
+    .pill-green  { background: rgba(20,241,149,.1); border: 1px solid rgba(20,241,149,.25); color: var(--accent2); }
+    .pill-gold   { background: rgba(255,209,102,.1); border: 1px solid rgba(255,209,102,.25); color: var(--gold); }
     h1 {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 700;
-      line-height: 1.15;
-      margin-bottom: 1.25rem;
-      background: linear-gradient(135deg, #fff 0%, #9945FF 60%, #14F195 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: clamp(2.1rem, 5.5vw, 3.6rem); font-weight: 700; line-height: 1.12; margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #fff 0%, #c084fc 40%, #14F195 80%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .hero-sub {
-      color: var(--muted);
-      font-size: 1.1rem;
-      max-width: 560px;
-      margin: 0 auto 2rem;
+    .hero-sub { color: var(--muted); font-size: 1.08rem; max-width: 580px; margin: 0 auto 2rem; }
+    .hero-actions { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+
+    /* DUAL-LAYER BADGE */
+    .dual-layer {
+      display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+      max-width: 520px; margin: 0 auto 3rem; font-size: .8rem;
     }
-    .hero-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    .dl-side {
+      flex: 1; padding: .9rem 1.1rem; text-align: center;
+    }
+    .dl-side:first-child { border-right: 1px solid var(--border); background: rgba(153,69,255,.06); }
+    .dl-side:last-child { background: rgba(20,241,149,.05); }
+    .dl-label { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .3rem; }
+    .dl-side:first-child .dl-label { color: var(--accent); }
+    .dl-side:last-child  .dl-label { color: var(--accent2); }
+    .dl-desc { color: var(--muted); line-height: 1.45; font-size: .78rem; }
 
     /* TERMINAL */
-    .terminal {
-      margin: 3rem auto;
-      max-width: 680px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .terminal-bar {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.75rem 1rem;
-      background: #0d0d15;
-      border-bottom: 1px solid var(--border);
-    }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot-r { background: #ff5f56; }
-    .dot-y { background: #ffbd2e; }
-    .dot-g { background: #27c93f; }
-    .terminal-title { margin-left: auto; font-size: 0.75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-    .terminal-body { padding: 1.25rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.8; }
-    .t-prompt { color: var(--accent2); }
+    .terminal { max-width: 720px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .terminal-bar { display: flex; align-items: center; gap: .4rem; padding: .7rem 1rem; background: #0a0a14; border-bottom: 1px solid var(--border); }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-r { background: #ff5f56; } .dot-y { background: #ffbd2e; } .dot-g { background: #27c93f; }
+    .t-title { margin-left: auto; font-size: .72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .terminal-body { padding: 1.1rem 1.4rem; font-family: 'JetBrains Mono', monospace; font-size: .79rem; line-height: 1.9; }
+    .t-p { color: var(--accent2); } .t-c { color: var(--muted); } .t-e { color: var(--red); }
+    .t-s { color: var(--accent2); } .t-i { color: var(--blue); } .t-w { color: var(--gold); }
     .t-cmd { color: var(--text); }
-    .t-comment { color: var(--muted); }
-    .t-error { color: var(--red); }
-    .t-success { color: var(--accent2); }
-    .t-info { color: #61dafb; }
+    .t-div { color: var(--border); border-top: 1px solid var(--border); margin: .5rem 0; }
 
-    /* PROBLEMS */
-    .section { padding: 4rem 2rem; max-width: 1000px; margin: 0 auto; }
-    .section-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
-    h2 { font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; }
-    .problems-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    .problem-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.25rem;
-      transition: border-color 0.2s;
-    }
-    .problem-card:hover { border-color: var(--accent); }
-    .problem-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
-    .problem-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.375rem; }
-    .problem-desc { color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+    /* SECTIONS */
+    .section { padding: 4rem 2rem; max-width: 1040px; margin: 0 auto; }
+    .sec-label { color: var(--accent2); font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .6rem; }
+    h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: .75rem; }
+    .sub { color: var(--muted); font-size: .95rem; max-width: 580px; }
 
-    /* FEATURES */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
-      margin-top: 2rem;
-    }
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.5rem;
-    }
-    .feature-tag {
-      display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem;
-      color: var(--accent2);
-      background: rgba(20,241,149,0.08);
-      border: 1px solid rgba(20,241,149,0.2);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      margin-bottom: 0.75rem;
-    }
-    .feature-title { font-weight: 600; margin-bottom: 0.5rem; }
-    .feature-desc { color: var(--muted); font-size: 0.85rem; line-height: 1.55; }
+    /* PROBLEM GRID */
+    .p-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .p-card { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 1.2rem; transition: border-color .2s; }
+    .p-card:hover { border-color: var(--accent); }
+    .p-icon { font-size: 1.4rem; margin-bottom: .4rem; }
+    .p-title { font-weight: 600; font-size: .88rem; margin-bottom: .3rem; }
+    .p-desc { color: var(--muted); font-size: .78rem; line-height: 1.5; }
+    .layer-tag { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; }
+    .layer-anchor { color: var(--accent); }
+    .layer-payfi  { color: var(--accent2); }
 
-    /* STRUCTURE */
-    .file-tree {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.5rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      line-height: 2;
-      margin-top: 2rem;
-    }
-    .tree-dir { color: var(--accent); }
-    .tree-file { color: var(--text); }
-    .tree-comment { color: var(--muted); }
+    /* SKILLS GRID */
+    .sk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.1rem; margin-top: 2rem; }
+    .sk-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem; }
+    .sk-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: .7rem; padding: .2rem .5rem; border-radius: 4px; margin-bottom: .7rem; }
+    .sk-anchor { color: var(--accent);  background: rgba(153,69,255,.1); border: 1px solid rgba(153,69,255,.2); }
+    .sk-payfi  { color: var(--accent2); background: rgba(20,241,149,.08); border: 1px solid rgba(20,241,149,.18); }
+    .sk-title { font-weight: 600; margin-bottom: .4rem; font-size: .92rem; }
+    .sk-desc { color: var(--muted); font-size: .82rem; line-height: 1.5; }
+
+    /* FILE TREE */
+    .tree { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.4rem 1.6rem; font-family: 'JetBrains Mono', monospace; font-size: .78rem; line-height: 2; margin-top: 2rem; }
+    .tr-d { color: var(--accent); }
+    .tr-f { color: var(--text); }
+    .tr-c { color: var(--muted); }
+    .tr-payfi { color: var(--accent2); }
+    .tr-sep { color: var(--muted); opacity: .4; border-top: 1px solid var(--border); margin: .4rem 0; }
 
     /* INSTALL */
-    .install-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-top: 2rem;
-    }
-    .install-cmd {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      color: var(--accent2);
-      background: #0a0a0f;
-      padding: 0.75rem 1rem;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      margin-top: 0.75rem;
-      word-break: break-all;
-    }
+    .inst-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-top: 2rem; }
+    .inst-label { color: var(--muted); font-size: .82rem; margin-bottom: .4rem; }
+    .inst-cmd { font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: var(--accent2); background: #060610; padding: .7rem 1rem; border-radius: 6px; border: 1px solid var(--border); margin-bottom: .75rem; word-break: break-all; }
 
     /* FOOTER */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.8rem;
-    }
-    .solana-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-top: 0.5rem;
-      color: var(--accent2);
-      font-size: 0.75rem;
-    }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .78rem; }
+    .f-links { display: flex; gap: 1rem; justify-content: center; margin-top: .5rem; }
+    .f-links a { color: var(--muted); }
+    .f-links a:hover { color: var(--accent2); text-decoration: none; }
 
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       nav { padding: 1rem; }
-      .hero { padding: 3rem 1rem 2rem; }
+      .hero { padding: 3.5rem 1rem 2rem; }
       .section { padding: 2.5rem 1rem; }
+      .dual-layer { flex-direction: column; }
+      .dl-side:first-child { border-right: none; border-bottom: 1px solid var(--border); }
     }
   </style>
 </head>
 <body>
 
 <nav>
-  <span class="nav-logo">anchor-debugger-skill</span>
+  <span class="nav-logo">anchor-payfi-debugger-skill</span>
   <div class="nav-links">
-    <a href="#features">Features</a>
+    <a href="#skills">Skills</a>
     <a href="#install">Install</a>
     <a href="https://github.com/nayrbryanGaming/anchor-debugger-skill" target="_blank" class="btn btn-ghost">GitHub</a>
   </div>
 </nav>
 
+<!-- HERO -->
 <div class="hero">
-  <div class="badge">Solana AI Kit Skill</div>
-  <h1>Debug Anchor Programs<br/>at the Speed of Thought</h1>
+  <div class="pill-row">
+    <span class="pill pill-purple">Solana AI Kit</span>
+    <span class="pill pill-green">Anchor Debugging</span>
+    <span class="pill pill-gold">× PayFi</span>
+  </div>
+  <h1>Debug Payment Programs.<br/>Ship PayFi Primitives.</h1>
   <p class="hero-sub">
-    Production-grade Claude Code skill for Solana developers. Decode cryptic errors, optimize compute units, and prevent the pitfalls that cost you hours every week.
+    The only Solana AI Kit skill that covers both sides of the stack — Anchor transaction debugging and production-grade PayFi patterns. Escrow, streaming, x402 agent payments, clock drift, priority fees.
   </p>
   <div class="hero-actions">
     <a href="#install" class="btn btn-primary">Install Now</a>
-    <a href="https://github.com/nayrbryanGaming/anchor-debugger-skill" class="btn btn-ghost" target="_blank">View on GitHub</a>
+    <a href="https://github.com/nayrbryanGaming/anchor-debugger-skill" target="_blank" class="btn btn-ghost">View on GitHub</a>
+  </div>
+
+  <div class="dual-layer">
+    <div class="dl-side">
+      <div class="dl-label">Layer 1 — Anchor Core</div>
+      <div class="dl-desc">Transaction debugging · Error catalog (300+) · CU optimization · Upgrade safety · Simulation · PDA pitfalls</div>
+    </div>
+    <div class="dl-side">
+      <div class="dl-label">Layer 2 — PayFi</div>
+      <div class="dl-desc">Escrow · Streaming · x402 agent payments · Clock drift · Rent safety · Yield-bearing rails · High-TPS pitfalls</div>
+    </div>
   </div>
 </div>
 
-<div class="terminal">
-  <div class="terminal-bar">
-    <span class="dot dot-r"></span>
-    <span class="dot dot-y"></span>
-    <span class="dot dot-g"></span>
-    <span class="terminal-title">Claude Code — Anchor Debugger</span>
-  </div>
-  <div class="terminal-body">
-    <div><span class="t-prompt">$</span> <span class="t-cmd">/debug-tx 5KtPxJm...R2m --cluster devnet</span></div>
-    <div><span class="t-comment">─── Transaction Diagnosis ──────────────────────────</span></div>
-    <div><span class="t-error">✗ FAILED</span> <span class="t-comment">— ConstraintSeeds (309)</span></div>
-    <div><span class="t-comment">  Account:  vault</span></div>
-    <div><span class="t-comment">  Cause:    PDA derivation mismatch between client and program</span></div>
-    <div><span class="t-comment">  CUs used: 45,230 / 200,000</span></div>
-    <div>&nbsp;</div>
-    <div><span class="t-success">→ Fix:</span> <span class="t-comment">Seed encoding mismatch. Use b"vault" (not string). Ensure</span></div>
-    <div><span class="t-comment">        canonical bump from ctx.bumps.vault is stored and reused.</span></div>
-    <div>&nbsp;</div>
-    <div><span class="t-prompt">$</span> <span class="t-cmd">/optimize-cu ./programs/vault/src/instructions/deposit.rs</span></div>
-    <div><span class="t-info">Measured CU: 183,240</span></div>
-    <div><span class="t-success">1.</span> <span class="t-comment">AccountLoader&lt;LargePool&gt; instead of Account&lt;LargePool&gt;: -40k CU</span></div>
-    <div><span class="t-success">2.</span> <span class="t-comment">Fixed-size arrays instead of String fields: -8k CU</span></div>
-    <div><span class="t-success">3.</span> <span class="t-comment">Cache SHA256 outside loop: -4k CU</span></div>
-    <div><span class="t-info">Estimated post-optimization: ~131k CU</span></div>
+<!-- TERMINAL -->
+<div style="max-width:760px;margin:0 auto;padding:0 1.5rem 3.5rem;">
+  <div class="terminal">
+    <div class="terminal-bar">
+      <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+      <span class="t-title">Claude Code — PayFi Debugger</span>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-p">$</span> <span class="t-cmd">/debug-tx 5KtP...R2m --cluster devnet</span></div>
+      <div><span class="t-c">─── PayFi Transaction Diagnosis ─────────────────────</span></div>
+      <div><span class="t-e">✗ FAILED</span> <span class="t-c">EscrowError::NotUnlockedYet (6002)</span></div>
+      <div><span class="t-c">  Account:  escrow (PDA)</span></div>
+      <div><span class="t-w">  Cause:    Clock drift — on-chain time is 4m 12s behind wall clock</span></div>
+      <div><span class="t-c">  unlock_at:  1751234567  |  chain_now: 1751234315</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-s">→ Fix:</span> <span class="t-c">Add CLOCK_DRIFT_BUFFER_SECS = 300 to constraint, or wait</span></div>
+      <div><span class="t-c">        ~252 more seconds for on-chain clock to catch up.</span></div>
+      <div><span class="t-c">─────────────────────────────────────────────────────</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-p">$</span> <span class="t-cmd">Build me a time-locked USDC escrow in Anchor</span></div>
+      <div><span class="t-i">→ reads payfi-patterns.md</span></div>
+      <div><span class="t-s">✓</span> <span class="t-c">Scaffold: CreateEscrow + ReleaseEscrow with rent checks,</span></div>
+      <div><span class="t-c">  unix_timestamp lock, canonical bump, close = depositor.</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-p">$</span> <span class="t-cmd">My x402 payment fails — QuoteExpired</span></div>
+      <div><span class="t-i">→ reads payfi-tx-debugging.md</span></div>
+      <div><span class="t-s">→ Fix:</span> <span class="t-c">Re-fetch quote before tx build. Quote TTL is server-defined.</span></div>
+      <div><span class="t-c">  Add 30s buffer check: if Date.now()/1000 + 30 > expiry → refetch</span></div>
+    </div>
   </div>
 </div>
 
+<!-- PROBLEMS -->
 <div class="section" id="problems">
-  <div class="section-label">The Problem</div>
-  <h2>Every Anchor developer hits these daily</h2>
-  <p style="color:var(--muted);max-width:580px;">These aren't rare edge cases — they're the primary friction points that slow every Solana engineer every day. No existing AI kit skill covers them.</p>
-  <div class="problems-grid">
-    <div class="problem-card">
-      <div class="problem-icon">❌</div>
-      <div class="problem-title">Cryptic error codes</div>
-      <div class="problem-desc">0x1775, 0x135, custom program error: 309 — what does it mean and where do you look?</div>
+  <div class="sec-label">The Problem</div>
+  <h2>Two layers of pain, one skill</h2>
+  <p class="sub">Payment programs combine all of Anchor's complexity with time-sensitive, money-at-stake constraints that break in uniquely catastrophic ways.</p>
+  <div class="p-grid" style="margin-top:2rem;">
+    <div class="p-card">
+      <div class="layer-tag layer-anchor">Anchor</div>
+      <div class="p-icon">❌</div>
+      <div class="p-title">Cryptic error codes</div>
+      <div class="p-desc">0x1775, ConstraintSeeds, AccountDiscriminatorMismatch — decoded to cause + fix instantly.</div>
     </div>
-    <div class="problem-card">
-      <div class="problem-icon">⚡</div>
-      <div class="problem-title">Compute budget exceeded</div>
-      <div class="problem-desc">Transaction fails under load. Where are the CUs going and which change saves the most?</div>
+    <div class="p-card">
+      <div class="layer-tag layer-anchor">Anchor</div>
+      <div class="p-icon">⚡</div>
+      <div class="p-title">Compute budget exceeded</div>
+      <div class="p-desc">Identify exactly which operation is burning CUs and what to change: zero-copy, fixed arrays, CPI batching.</div>
     </div>
-    <div class="problem-card">
-      <div class="problem-icon">🔄</div>
-      <div class="problem-title">Unsafe program upgrades</div>
-      <div class="problem-desc">One reordered field corrupts every account. Is your struct change safe to ship?</div>
+    <div class="p-card">
+      <div class="layer-tag layer-payfi">PayFi</div>
+      <div class="p-icon">🕐</div>
+      <div class="p-title">Clock drift</div>
+      <div class="p-desc">Escrow won't unlock even though wall-clock time has passed. On-chain clock drifts ±5 min from real time.</div>
     </div>
-    <div class="problem-card">
-      <div class="problem-icon">📍</div>
-      <div class="problem-title">PDA derivation mismatches</div>
-      <div class="problem-desc">Client and program disagree on the address. Seed encoding, canonical bumps, byte order.</div>
+    <div class="p-card">
+      <div class="layer-tag layer-payfi">PayFi</div>
+      <div class="p-icon">💸</div>
+      <div class="p-title">Rent drains stream</div>
+      <div class="p-desc">Stream account loses rent-exemption and gets garbage collected. All pending payments are lost permanently.</div>
     </div>
-  </div>
-</div>
-
-<div class="section" id="features">
-  <div class="section-label">What's Included</div>
-  <h2>Six production-grade skill files</h2>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-tag">skill/tx-debugging.md</div>
-      <div class="feature-title">Transaction Debugging</div>
-      <div class="feature-desc">Parse Anchor logs, decode every error code (Anchor, System, Token Program), trace CPI failures through nested instruction calls.</div>
+    <div class="p-card">
+      <div class="layer-tag layer-payfi">PayFi</div>
+      <div class="p-icon">🤖</div>
+      <div class="p-title">x402 payment rejected</div>
+      <div class="p-desc">AI agent's payment quote expired before the tx landed. Amount mismatch, wrong mint, replay attack.</div>
     </div>
-    <div class="feature-card">
-      <div class="feature-tag">skill/compute-optimization.md</div>
-      <div class="feature-title">Compute Unit Optimization</div>
-      <div class="feature-desc">Profile CU usage per instruction, identify hogs (large account deserialization, loops, CPIs), implement zero-copy, set accurate budgets.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-tag">skill/error-catalog.md</div>
-      <div class="feature-title">Complete Error Catalog</div>
-      <div class="feature-desc">300+ error codes across Anchor framework, System Program, and Token Program — with causes and fixes, not just names.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-tag">skill/upgrade-safety.md</div>
-      <div class="feature-title">Program Upgrade Safety</div>
-      <div class="feature-desc">Detect breaking struct changes, write migration instructions, IDL diff, upgrade execution and authority management.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-tag">skill/simulation.md</div>
-      <div class="feature-title">Transaction Simulation</div>
-      <div class="feature-desc">Pre-flight checks, accurate CU measurement, batch simulation, CPI failure parsing — all before spending a lamport on mainnet.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-tag">skill/common-pitfalls.md</div>
-      <div class="feature-title">Common Pitfalls</div>
-      <div class="feature-desc">PDA seed encoding, canonical bump storage, account reloading after CPI, overflow, closing accounts safely, duplicate mutables.</div>
+    <div class="p-card">
+      <div class="layer-tag layer-payfi">PayFi</div>
+      <div class="p-icon">📦</div>
+      <div class="p-title">Batch settlement fails</div>
+      <div class="p-desc">100 payments queued, 30 fail mid-batch due to CU budget. Priority fees not set. Recipients left unpaid.</div>
     </div>
   </div>
 </div>
 
+<!-- SKILLS -->
+<div class="section" id="skills">
+  <div class="sec-label">What's Included</div>
+  <h2>11 production-grade skill files</h2>
+  <p class="sub">Token-efficient routing — SKILL.md loads only what's relevant. A streaming question never loads the error catalog.</p>
+  <div class="sk-grid">
+    <div class="sk-card">
+      <div class="sk-tag sk-anchor">tx-debugging.md</div>
+      <div class="sk-title">Transaction Debugging</div>
+      <div class="sk-desc">Parse logs, decode all Anchor/System/Token errors, trace CPI failures through nested calls.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-anchor">error-catalog.md</div>
+      <div class="sk-title">Complete Error Catalog</div>
+      <div class="sk-desc">300+ error codes across Anchor framework, System Program, and Token Program — with causes and fixes.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-anchor">compute-optimization.md</div>
+      <div class="sk-title">CU Optimization</div>
+      <div class="sk-desc">Profile CU usage, implement zero-copy, set accurate budgets, optimize borsh layout.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-anchor">upgrade-safety.md</div>
+      <div class="sk-title">Program Upgrade Safety</div>
+      <div class="sk-desc">Detect breaking struct changes, write migration instructions, IDL diff, upgrade execution.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-anchor">simulation.md + common-pitfalls.md</div>
+      <div class="sk-title">Simulation & Pitfalls</div>
+      <div class="sk-desc">Pre-flight checks, PDA seed bugs, canonical bumps, account reloading after CPI, overflow.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-payfi">payfi-overview.md</div>
+      <div class="sk-title">PayFi Landscape</div>
+      <div class="sk-desc">Protocol map: Streamflow, Zebec, x402, Squads, USDC/PYUSD/USDY — why PayFi programs are harder to debug.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-payfi">payfi-tx-debugging.md</div>
+      <div class="sk-title">PayFi Tx Debugging</div>
+      <div class="sk-desc">Escrow unlock failures, stream drain, x402 quote expiry, stablecoin decimal mismatch, multi-hop routing.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-payfi">payfi-patterns.md</div>
+      <div class="sk-title">PayFi Patterns</div>
+      <div class="sk-desc">Production Anchor code: time-locked escrow, streaming payments, x402 agent payments, yield-bearing escrow, conditional oracle release.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-payfi">payfi-cu-pitfalls.md</div>
+      <div class="sk-title">PayFi CU & Pitfalls</div>
+      <div class="sk-desc">Clock drift (the #1 hidden bug), rent protection, priority fee strategy for payment batches, high-TPS rate limiting.</div>
+    </div>
+    <div class="sk-card">
+      <div class="sk-tag sk-payfi">payfi-simulation.md</div>
+      <div class="sk-title">PayFi Simulation</div>
+      <div class="sk-desc">Pre-flight checks for payment flows, stream withdraw simulation, x402 quote validation, live monitoring for stale escrows.</div>
+    </div>
+  </div>
+</div>
+
+<!-- STRUCTURE -->
 <div class="section">
-  <div class="section-label">Structure</div>
+  <div class="sec-label">Structure</div>
   <h2>Follows the Solana AI Kit pattern</h2>
-  <p style="color:var(--muted);max-width:580px;">Token-efficient progressive loading — SKILL.md routes to only the relevant file. A CU question doesn't load the error catalog.</p>
-  <div class="file-tree">
-    <div><span class="tree-dir">anchor-debugger-skill/</span></div>
+  <div class="tree">
+    <div><span class="tr-d">anchor-payfi-debugger-skill/</span></div>
     <div>├── README.md</div>
     <div>├── install.sh</div>
-    <div>├── <span class="tree-dir">skill/</span></div>
-    <div>│   ├── <span class="tree-file">SKILL.md</span>            <span class="tree-comment">← smart router</span></div>
-    <div>│   ├── tx-debugging.md      <span class="tree-comment">← failing tx + error codes</span></div>
+    <div>├── <span class="tr-d">skill/</span></div>
+    <div>│   ├── <span class="tr-f">SKILL.md</span>                 <span class="tr-c">← smart router (token-efficient)</span></div>
+    <div>│   ├── <span class="tr-c">── Anchor Core ──</span></div>
+    <div>│   ├── tx-debugging.md</div>
     <div>│   ├── compute-optimization.md</div>
-    <div>│   ├── error-catalog.md     <span class="tree-comment">← 300+ error reference</span></div>
+    <div>│   ├── error-catalog.md          <span class="tr-c">← 300+ errors</span></div>
     <div>│   ├── upgrade-safety.md</div>
     <div>│   ├── simulation.md</div>
-    <div>│   └── common-pitfalls.md</div>
-    <div>├── <span class="tree-dir">agents/</span>               <span class="tree-comment">← anchor-debugger agent</span></div>
-    <div>├── <span class="tree-dir">commands/</span>             <span class="tree-comment">← /debug-tx /optimize-cu /check-upgrade</span></div>
-    <div>└── <span class="tree-dir">rules/</span>                <span class="tree-comment">← anchor coding rules</span></div>
+    <div>│   ├── common-pitfalls.md</div>
+    <div>│   ├── <span class="tr-c">── PayFi Layer ──</span></div>
+    <div>│   ├── <span class="tr-payfi">payfi-overview.md</span></div>
+    <div>│   ├── <span class="tr-payfi">payfi-tx-debugging.md</span></div>
+    <div>│   ├── <span class="tr-payfi">payfi-patterns.md</span>        <span class="tr-c">← escrow/streaming/x402 code</span></div>
+    <div>│   ├── <span class="tr-payfi">payfi-cu-pitfalls.md</span>     <span class="tr-c">← clock drift · rent · priority fees</span></div>
+    <div>│   └── <span class="tr-payfi">payfi-simulation.md</span></div>
+    <div>├── <span class="tr-d">agents/</span>                      <span class="tr-c">← anchor-debugger agent</span></div>
+    <div>├── <span class="tr-d">commands/</span>                    <span class="tr-c">← /debug-tx /optimize-cu /check-upgrade</span></div>
+    <div>└── <span class="tr-d">rules/</span>                       <span class="tr-c">← Anchor + PayFi coding rules</span></div>
   </div>
 </div>
 
+<!-- INSTALL -->
 <div class="section" id="install">
-  <div class="section-label">Installation</div>
-  <h2>One command install</h2>
-  <div class="install-box">
-    <div style="color:var(--muted);font-size:0.85rem;margin-bottom:0.5rem;">Via curl</div>
-    <div class="install-cmd">curl -sSL https://raw.githubusercontent.com/nayrbryanGaming/anchor-debugger-skill/master/install.sh | bash</div>
-    <div style="color:var(--muted);font-size:0.85rem;margin-top:1rem;margin-bottom:0.5rem;">Or clone manually</div>
-    <div class="install-cmd">git clone https://github.com/nayrbryanGaming/anchor-debugger-skill.git && cd anchor-debugger-skill && ./install.sh</div>
-    <div style="color:var(--muted);font-size:0.85rem;margin-top:1rem;margin-bottom:0.5rem;">As a git submodule</div>
-    <div class="install-cmd">git submodule add https://github.com/nayrbryanGaming/anchor-debugger-skill.git .claude/skills/anchor-debugger-skill</div>
+  <div class="sec-label">Installation</div>
+  <h2>One command</h2>
+  <div class="inst-box">
+    <div class="inst-label">Via curl</div>
+    <div class="inst-cmd">curl -sSL https://raw.githubusercontent.com/nayrbryanGaming/anchor-debugger-skill/master/install.sh | bash</div>
+    <div class="inst-label">Clone + install</div>
+    <div class="inst-cmd">git clone https://github.com/nayrbryanGaming/anchor-debugger-skill.git && cd anchor-debugger-skill && ./install.sh</div>
+    <div class="inst-label">As git submodule</div>
+    <div class="inst-cmd">git submodule add https://github.com/nayrbryanGaming/anchor-debugger-skill.git .claude/skills/anchor-payfi-debugger-skill</div>
   </div>
-  <div style="margin-top:2rem;">
-    <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem;">Then use it naturally in Claude Code:</div>
-    <div class="terminal" style="margin:0;">
-      <div class="terminal-body" style="padding:1rem 1.5rem;">
-        <div><span class="t-prompt">$</span> <span class="t-cmd">/debug-tx &lt;SIGNATURE&gt;</span></div>
-        <div><span class="t-prompt">$</span> <span class="t-cmd">/optimize-cu ./programs/my_program/src/lib.rs</span></div>
-        <div><span class="t-prompt">$</span> <span class="t-cmd">/check-upgrade ./target/idl/vault.json --program-id &lt;ID&gt;</span></div>
-        <div><span class="t-comment"># or just ask naturally:</span></div>
-        <div><span class="t-cmd">"Why did my tx fail with 0x1775?"</span></div>
+
+  <div style="margin-top:2.5rem;">
+    <p class="sub" style="margin-bottom:1rem;">Then use naturally in Claude Code:</p>
+    <div class="terminal">
+      <div class="terminal-body" style="padding:.9rem 1.4rem;">
+        <div><span class="t-p">$</span> <span class="t-cmd">/debug-tx &lt;SIGNATURE&gt;</span></div>
+        <div><span class="t-p">$</span> <span class="t-cmd">/optimize-cu ./programs/escrow/src/lib.rs</span></div>
+        <div><span class="t-p">$</span> <span class="t-cmd">/check-upgrade ./target/idl/escrow.json --program-id &lt;ID&gt;</span></div>
+        <div><span class="t-c"># or ask naturally:</span></div>
+        <div><span class="t-cmd">"Why did my escrow unlock fail even though the time has passed?"</span></div>
+        <div><span class="t-cmd">"Build me a streaming payment with rent protection"</span></div>
+        <div><span class="t-cmd">"How do I implement x402 agent payments in Anchor?"</span></div>
       </div>
     </div>
   </div>
 </div>
 
 <footer>
-  <div>anchor-debugger-skill — MIT License</div>
-  <div class="solana-badge">Built for the Solana AI Kit · Superteam Brasil Bounty 2026</div>
-  <div style="margin-top:0.75rem;">
+  <div>anchor-payfi-debugger-skill — MIT License</div>
+  <div class="f-links">
     <a href="https://github.com/nayrbryanGaming/anchor-debugger-skill" target="_blank">GitHub</a>
-    &nbsp;·&nbsp;
     <a href="https://github.com/solanabr/solana-ai-kit" target="_blank">Solana AI Kit</a>
+    <a href="https://github.com/solanabr/skill-bounty" target="_blank">Skill Bounty</a>
   </div>
+  <div style="margin-top:.75rem;color:#3a3a55;">Built for Superteam Brasil Bounty · June 2026</div>
 </footer>
 
 </body>
