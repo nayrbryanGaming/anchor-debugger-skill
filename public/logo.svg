@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="40" viewBox="0 0 200 40" fill="none">
+  <!-- Anchor stem ring -->
+  <circle cx="15" cy="8" r="5.5" stroke="#9945FF" stroke-width="2.2"/>
+  <circle cx="15" cy="8" r="2.2" fill="#9945FF" fill-opacity="0.3"/>
+  <!-- Vertical stem -->
+  <line x1="15" y1="13.5" x2="15" y2="32" stroke="#9945FF" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Horizontal crossbar -->
+  <line x1="6" y1="20" x2="24" y2="20" stroke="#9945FF" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Left fluke -->
+  <path d="M6 20 Q3 27 9 32" stroke="#9945FF" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <!-- Right fluke -->
+  <path d="M24 20 Q27 27 21 32" stroke="#9945FF" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <!-- Debug indicator ring -->
+  <circle cx="26" cy="7" r="5.5" fill="#14F195"/>
+  <circle cx="26" cy="7" r="2.8" fill="#050508"/>
+  <!-- Cursor inside indicator -->
+  <rect x="24.5" y="5.5" width="3" height="3" rx="0.5" fill="#14F195" opacity="0.9"/>
+  <!-- Wordmark: "anchor" -->
+  <text x="38" y="26" font-family="'Courier New', Courier, monospace" font-size="16" font-weight="700" fill="#E2E2EF" letter-spacing="-0.3">anchor</text>
+  <!-- Dot -->
+  <circle cx="111" cy="22" r="2.5" fill="#9945FF"/>
+  <!-- Wordmark: "debug" -->
+  <text x="118" y="26" font-family="'Courier New', Courier, monospace" font-size="16" font-weight="700" fill="#14F195" letter-spacing="-0.3">debug</text>
+</svg>
